@@ -7,6 +7,7 @@ import {
   insertAppointmentSchema,
   insertNewsSchema,
 } from "@shared/schema";
+import { generateSpecialtyIcon, generateNewsImage } from "./openai-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/hospitals", async (_req, res) => {
@@ -130,6 +131,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(newsItem);
     } catch (error: any) {
       res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/specialties/:id/generate-image", async (req, res) => {
+    try {
+      const specialty = await storage.getSpecialty(req.params.id);
+      if (!specialty) {
+        return res.status(404).json({ error: "Especialidade não encontrada" });
+      }
+
+      const imageUrl = await generateSpecialtyIcon(specialty.name);
+      await storage.updateSpecialtyImage(req.params.id, imageUrl);
+
+      res.json({ imageUrl });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/news/:id/generate-image", async (req, res) => {
+    try {
+      const newsItem = await storage.getNewsItem(req.params.id);
+      if (!newsItem) {
+        return res.status(404).json({ error: "Notícia não encontrada" });
+      }
+
+      const imageUrl = await generateNewsImage(newsItem.title, newsItem.category);
+      await storage.updateNewsImage(req.params.id, imageUrl);
+
+      res.json({ imageUrl });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
   });
 
