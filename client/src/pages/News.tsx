@@ -1,52 +1,15 @@
 import { NewsCard } from "@/components/NewsCard";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import type { News } from "@shared/schema";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export default function News() {
-  const newsItems = [
-    {
-      id: "1",
-      title: "Nova Campanha de Vacinação contra a Gripe",
-      summary: "A Secretaria de Saúde anuncia o início da campanha de vacinação contra a gripe para idosos e grupos prioritários. Atendimento disponível em todas as unidades.",
-      category: "Vacinação",
-      date: "15 Jan 2025",
-    },
-    {
-      id: "2",
-      title: "Dicas para Prevenir Doenças Cardiovasculares",
-      summary: "Especialistas compartilham orientações importantes sobre alimentação saudável, exercícios físicos e check-ups regulares para cuidar do coração.",
-      category: "Prevenção",
-      date: "12 Jan 2025",
-    },
-    {
-      id: "3",
-      title: "Novos Horários de Atendimento nos Hospitais",
-      summary: "A partir desta semana, os hospitais de São Caetano do Sul ampliam horários de atendimento para melhor atender a população.",
-      category: "Atendimento",
-      date: "10 Jan 2025",
-    },
-    {
-      id: "4",
-      title: "Importância do Check-up Regular",
-      summary: "Médicos reforçam a necessidade de realizar exames de rotina para detectar doenças precocemente e manter a saúde em dia.",
-      category: "Saúde",
-      date: "08 Jan 2025",
-    },
-    {
-      id: "5",
-      title: "Campanha de Conscientização sobre Diabetes",
-      summary: "Ações educativas sobre prevenção e controle do diabetes serão realizadas nas unidades de saúde durante todo o mês.",
-      category: "Prevenção",
-      date: "05 Jan 2025",
-    },
-    {
-      id: "6",
-      title: "Novo Equipamento de Ressonância Magnética",
-      summary: "Hospital Municipal recebe novo equipamento de última geração para exames de ressonância magnética, reduzindo tempo de espera.",
-      category: "Tecnologia",
-      date: "02 Jan 2025",
-    },
-  ];
+  const { data: newsItems = [], isLoading } = useQuery<News[]>({
+    queryKey: ["/api/news"],
+  });
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
@@ -68,11 +31,25 @@ export default function News() {
           </div>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2">
-          {newsItems.map((news) => (
-            <NewsCard key={news.id} {...news} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="grid gap-8 md:grid-cols-2">
+            {newsItems.map((news) => (
+              <NewsCard
+                key={news.id}
+                id={news.id}
+                title={news.title}
+                summary={news.summary}
+                category={news.category}
+                date={format(new Date(news.publishedAt), "dd MMM yyyy", { locale: ptBR })}
+                imageUrl={news.imageUrl || undefined}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

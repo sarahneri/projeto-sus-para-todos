@@ -6,13 +6,17 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { ChevronLeft, ChevronRight, CheckCircle2, Building2, Stethoscope, User, CalendarIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, CheckCircle2, Building2, Stethoscope, User, CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import type { Hospital, Specialty } from "@shared/schema";
 
 type BookingStep = 1 | 2 | 3 | 4 | 5;
 
 export function BookingForm() {
+  const { toast } = useToast();
   const [step, setStep] = useState<BookingStep>(1);
   const [hospital, setHospital] = useState("");
   const [serviceType, setServiceType] = useState("");
@@ -24,16 +28,13 @@ export function BookingForm() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState("");
 
-  const hospitals = [
-    { id: "1", name: "Hospital Municipal de São Caetano", address: "Rua das Flores, 123" },
-    { id: "2", name: "Hospital Dr. Manoel de Abreu", address: "Av. Goiás, 1000" },
-    { id: "3", name: "UPA 24h São Caetano", address: "Rua Amazonas, 500" },
-  ];
+  const { data: hospitals = [], isLoading: hospitalsLoading } = useQuery<Hospital[]>({
+    queryKey: ["/api/hospitals"],
+  });
 
-  const specialties = [
-    "Cardiologia", "Ortopedia", "Pediatria", "Ginecologia", 
-    "Dermatologia", "Oftalmologia", "Neurologia", "Clínico Geral"
-  ];
+  const { data: specialties = [], isLoading: specialtiesLoading } = useQuery<Specialty[]>({
+    queryKey: ["/api/specialties"],
+  });
 
   const timeSlots = [
     "08:00", "09:00", "10:00", "11:00", 
@@ -48,12 +49,55 @@ export function BookingForm() {
     if (step > 1) setStep((step - 1) as BookingStep);
   };
 
+  const createAppointment = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await fetch("/api/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Falha ao criar agendamento");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Agendamento confirmado!",
+        description: "Seu agendamento foi realizado com sucesso.",
+      });
+      setStep(1);
+      setHospital("");
+      setServiceType("");
+      setSpecialty("");
+      setPatientName("");
+      setPatientCPF("");
+      setPatientBirth("");
+      setPatientPhone("");
+      setSelectedDate(undefined);
+      setSelectedTime("");
+    },
+    onError: () => {
+      toast({
+        title: "Erro ao agendar",
+        description: "Não foi possível realizar o agendamento. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSubmit = () => {
-    console.log("Agendamento realizado:", {
-      hospital, serviceType, specialty, patientName, patientCPF,
-      patientBirth, patientPhone, selectedDate, selectedTime
+    if (!selectedDate) return;
+
+    createAppointment.mutate({
+      hospitalId: hospital,
+      specialtyId: specialty,
+      serviceType,
+      patientName,
+      patientCPF,
+      patientBirth,
+      patientPhone,
+      appointmentDate: selectedDate.toISOString(),
+      appointmentTime: selectedTime,
     });
-    alert("Agendamento confirmado com sucesso!");
   };
 
   const isStepValid = () => {
@@ -95,27 +139,33 @@ export function BookingForm() {
               <Building2 className="h-8 w-8 text-primary" />
               <h2 className="text-3xl font-semibold">Selecione o Hospital</h2>
             </div>
-            <RadioGroup value={hospital} onValueChange={setHospital}>
-              {hospitals.map((h) => (
-                <Card
-                  key={h.id}
-                  className={`p-6 cursor-pointer hover-elevate active-elevate-2 ${
-                    hospital === h.id ? "border-primary border-2" : ""
-                  }`}
-                  onClick={() => setHospital(h.id)}
-                >
-                  <div className="flex items-start gap-4">
-                    <RadioGroupItem value={h.id} id={h.id} data-testid={`radio-hospital-${h.id}`} />
-                    <div className="flex-1">
-                      <Label htmlFor={h.id} className="text-xl font-semibold cursor-pointer">
-                        {h.name}
-                      </Label>
-                      <p className="text-lg text-muted-foreground mt-1">{h.address}</p>
+            {hospitalsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <RadioGroup value={hospital} onValueChange={setHospital}>
+                {hospitals.map((h) => (
+                  <Card
+                    key={h.id}
+                    className={`p-6 cursor-pointer hover-elevate active-elevate-2 ${
+                      hospital === h.id ? "border-primary border-2" : ""
+                    }`}
+                    onClick={() => setHospital(h.id)}
+                  >
+                    <div className="flex items-start gap-4">
+                      <RadioGroupItem value={h.id} id={h.id} data-testid={`radio-hospital-${h.id}`} />
+                      <div className="flex-1">
+                        <Label htmlFor={h.id} className="text-xl font-semibold cursor-pointer">
+                          {h.name}
+                        </Label>
+                        <p className="text-lg text-muted-foreground mt-1">{h.address}</p>
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              ))}
-            </RadioGroup>
+                  </Card>
+                ))}
+              </RadioGroup>
+            )}
           </div>
         )}
 
@@ -159,21 +209,27 @@ export function BookingForm() {
         {step === 3 && (
           <div className="space-y-6">
             <h2 className="text-3xl font-semibold mb-6">Selecione a Especialidade</h2>
-            <div className="space-y-3">
-              <Label htmlFor="specialty" className="text-lg">Especialidade</Label>
-              <Select value={specialty} onValueChange={setSpecialty}>
-                <SelectTrigger className="h-14 text-lg" data-testid="select-specialty">
-                  <SelectValue placeholder="Escolha uma especialidade" />
-                </SelectTrigger>
-                <SelectContent>
-                  {specialties.map((s) => (
-                    <SelectItem key={s} value={s} className="text-lg">
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {specialtiesLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Label htmlFor="specialty" className="text-lg">Especialidade</Label>
+                <Select value={specialty} onValueChange={setSpecialty}>
+                  <SelectTrigger className="h-14 text-lg" data-testid="select-specialty">
+                    <SelectValue placeholder="Escolha uma especialidade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {specialties.map((s) => (
+                      <SelectItem key={s.id} value={s.id} className="text-lg">
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         )}
 

@@ -2,11 +2,18 @@ import OpenAI from "openai";
 
 // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
 // This is using OpenAI's API, which points to OpenAI's API servers and requires your own API key.
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = process.env.OPENAI_API_KEY 
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  : null;
 
 export async function generateMedicalIllustration(
   prompt: string
 ): Promise<string> {
+  if (!openai) {
+    console.warn("OpenAI API key not configured. Skipping image generation.");
+    return "";
+  }
+
   try {
     const response = await openai.images.generate({
       model: "dall-e-3",

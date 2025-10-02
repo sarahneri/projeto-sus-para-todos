@@ -19,12 +19,12 @@ export function Header() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
           <Link href="/">
-            <a className="flex items-center gap-3 hover-elevate active-elevate-2 rounded-lg px-3 py-2" data-testid="link-home">
+            <button className="flex items-center gap-3 hover-elevate active-elevate-2 rounded-lg px-3 py-2" data-testid="link-home">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
                 <span className="text-xl font-bold text-primary-foreground">SUS</span>
               </div>
               <span className="hidden text-xl font-bold sm:inline">SUS Para Todos</span>
-            </a>
+            </button>
           </Link>
 
           <nav className="hidden items-center gap-2 md:flex">

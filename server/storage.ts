@@ -13,7 +13,7 @@ import {
   appointments,
   news,
 } from "@shared/schema";
-import { eq, and, gte } from "drizzle-orm";
+import { eq, and, gte, sql } from "drizzle-orm";
 
 export interface IStorage {
   getHospitals(): Promise<Hospital[]>;
@@ -98,7 +98,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNews(): Promise<News[]> {
-    return await db.select().from(news).orderBy(news.publishedAt);
+    return await db.select().from(news).orderBy(sql`${news.publishedAt} DESC`);
   }
 
   async getNewsItem(id: string): Promise<News | undefined> {
