@@ -223,7 +223,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        return res.status(400).json({ error: "Email já cadastrado" });
+        return res.status(409).json({ error: "Email já cadastrado" });
       }
 
       const passwordHash = await hashPassword(password);
@@ -243,6 +243,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       if (error.name === "ZodError") {
         return res.status(400).json({ error: error.errors[0].message });
+      }
+      if (error.code === "23505" || error.message?.includes("unique")) {
+        return res.status(409).json({ error: "Email já cadastrado" });
       }
       res.status(500).json({ error: error.message });
     }
