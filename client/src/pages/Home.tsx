@@ -1,7 +1,7 @@
 import { HeroSection } from "@/components/HeroSection";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Hospital, Stethoscope, Calendar, Clock, Shield, Users } from "lucide-react";
+import { Hospital, Stethoscope, Calendar, Clock, Shield, Users, ClipboardList } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Home() {
@@ -71,12 +71,20 @@ export default function Home() {
           <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
             Agende sua consulta ou exame médico de forma rápida e segura
           </p>
-          <Link href="/agendar">
-            <Button size="lg" className="h-14 px-12 text-lg" data-testid="button-cta-agendar">
-              <Calendar className="mr-2 h-5 w-5" />
-              Começar Agendamento
-            </Button>
-          </Link>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link href="/agendar">
+              <Button size="lg" className="h-14 px-12 text-lg" data-testid="button-cta-agendar">
+                <Calendar className="mr-2 h-5 w-5" />
+                Começar Agendamento
+              </Button>
+            </Link>
+            <Link href="/meus-agendamentos">
+              <Button size="lg" variant="outline" className="h-14 px-12 text-lg" data-testid="button-cta-meus-agendamentos">
+                <ClipboardList className="mr-2 h-5 w-5" />
+                Meus Agendamentos
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
     </div>
