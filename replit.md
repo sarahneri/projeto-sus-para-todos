@@ -105,6 +105,7 @@ Preferred communication style: Simple, everyday language.
 
 3. **Appointments Table**
    - ID (UUID primary key)
+   - User ID (foreign key to users.id) - Links appointments to their owner
    - Foreign keys to hospitals and specialties
    - Patient information (name, CPF, birth date, phone)
    - Service type (consultation vs. exam)
@@ -144,11 +145,25 @@ Preferred communication style: Simple, everyday language.
 - Step 2: Set new password with strong password validation
 - **Note:** This is a simplified implementation without email tokens/links, designed for ease of use. For production, consider implementing token-based recovery with email verification for enhanced security.
 
+**Access Control and Permissions:**
+- User-scoped data access: Each user can only view/modify their own appointments
+- Middleware-based authentication (requireAuth) protects all appointment routes
+- Storage layer enforces userId filtering using Drizzle ORM `and()` conditions
+- Protected operations:
+  - GET /api/appointments - Returns only user's appointments
+  - GET /api/appointments/:id - Verifies ownership before returning
+  - POST /api/appointments - Auto-injects userId from session
+  - PUT /api/appointments/:id - Verifies ownership before updating
+  - DELETE /api/appointments/:id - Verifies ownership before deleting
+- Unauthorized access attempts return 401 (not authenticated) or 404 (not found/no permission)
+- Data isolation tested: Users cannot access other users' appointments
+
 **Security Features:**
 - Password hashes never exposed in API responses
 - All auth responses sanitized (returns only id, name, email)
 - Strong password enforcement on both frontend and backend
 - Secure session cookies (httpOnly, secure in production)
+- Row-level security via userId foreign key constraint
 
 **Users Table:**
 - ID (UUID primary key)
