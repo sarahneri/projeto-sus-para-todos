@@ -1,7 +1,7 @@
 import { HeroSection } from "@/components/HeroSection";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Hospital, Stethoscope, Calendar, Clock, Shield, Users, ClipboardList } from "lucide-react";
+import { Hospital, Stethoscope, Calendar, Clock, Shield, Users, ClipboardList, User } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Home() {
@@ -82,6 +82,12 @@ export default function Home() {
               <Button size="lg" variant="outline" className="h-14 px-12 text-lg" data-testid="button-cta-meus-agendamentos">
                 <ClipboardList className="mr-2 h-5 w-5" />
                 Meus Agendamentos
+              </Button>
+            </Link>
+            <Link href="/perfil">
+              <Button size="lg" variant="outline" className="h-14 px-12 text-lg" data-testid="button-cta-perfil">
+                <User className="mr-2 h-5 w-5" />
+                Meu Perfil
               </Button>
             </Link>
           </div>
