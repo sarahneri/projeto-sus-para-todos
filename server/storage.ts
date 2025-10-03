@@ -29,6 +29,8 @@ export interface IStorage {
   getAppointment(id: string): Promise<Appointment | undefined>;
   getAppointmentsByDate(date: Date): Promise<Appointment[]>;
   createAppointment(appointment: InsertAppointment): Promise<Appointment>;
+  updateAppointment(id: string, appointment: Partial<InsertAppointment>): Promise<Appointment>;
+  deleteAppointment(id: string): Promise<void>;
 
   getNews(): Promise<News[]>;
   getNewsItem(id: string): Promise<News | undefined>;
@@ -95,6 +97,15 @@ export class DatabaseStorage implements IStorage {
   async createAppointment(appointment: InsertAppointment): Promise<Appointment> {
     const result = await db.insert(appointments).values(appointment).returning();
     return result[0];
+  }
+
+  async updateAppointment(id: string, appointment: Partial<InsertAppointment>): Promise<Appointment> {
+    const result = await db.update(appointments).set(appointment).where(eq(appointments.id, id)).returning();
+    return result[0];
+  }
+
+  async deleteAppointment(id: string): Promise<void> {
+    await db.delete(appointments).where(eq(appointments.id, id));
   }
 
   async getNews(): Promise<News[]> {
