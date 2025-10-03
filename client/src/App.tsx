@@ -12,6 +12,7 @@ import News from "@/pages/News";
 import Login from "@/pages/Login";
 import CreateAccount from "@/pages/CreateAccount";
 import ForgotPassword from "@/pages/ForgotPassword";
+import MyAppointments from "@/pages/MyAppointments";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/" component={Login} />
       <Route path="/home" component={Home} />
       <Route path="/agendar" component={Booking} />
+      <Route path="/meus-agendamentos" component={MyAppointments} />
       <Route path="/noticias" component={News} />
       <Route path="/login" component={Login} />
       <Route path="/criar-conta" component={CreateAccount} />
