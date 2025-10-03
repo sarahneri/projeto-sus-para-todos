@@ -43,6 +43,7 @@ Preferred communication style: Simple, everyday language.
 - Home: Hero section with feature highlights and call-to-action buttons
 - Booking: Multi-step form for appointment scheduling
 - My Appointments: View, edit, and cancel scheduled appointments
+- Profile: User profile management (edit email, phone, password)
 - News: Health news and information articles
 - Create Account: User registration page
 - Forgot Password: Password recovery page
@@ -75,7 +76,8 @@ Preferred communication style: Simple, everyday language.
   - POST /api/auth/register - Create new user account
   - POST /api/auth/login - Authenticate user
   - POST /api/auth/logout - End user session
-  - GET /api/auth/me - Get current user info
+  - GET /api/auth/me - Get current user info (returns id, name, email, phone)
+  - PUT /api/auth/profile - Update user profile (email, phone, password with validation)
   - POST /api/auth/verify-email - Verify email exists for password recovery
   - POST /api/auth/reset-password - Reset user password (simplified flow)
 
@@ -128,7 +130,7 @@ Preferred communication style: Simple, everyday language.
 **Authentication System:** Fully implemented user authentication with secure session management.
 
 **User Registration:**
-- Strong password validation (8+ characters, uppercase, lowercase, numbers)
+- Strong password validation (8+ characters, uppercase, lowercase, numbers, special characters)
 - Visual password strength indicators in real-time
 - Email uniqueness enforcement
 - bcryptjs password hashing with salt rounds of 10
@@ -158,16 +160,27 @@ Preferred communication style: Simple, everyday language.
 - Unauthorized access attempts return 401 (not authenticated) or 404 (not found/no permission)
 - Data isolation tested: Users cannot access other users' appointments
 
+**User Profile Management:**
+- Dedicated profile page for viewing and editing user information
+- Update email with uniqueness validation
+- Update phone number (optional field)
+- Change password with current password verification
+- Real-time password strength indicators showing 5 requirements
+- Show/hide password toggles with eye icons for all password fields
+- Partial update support (can update email/phone without changing password)
+
 **Security Features:**
 - Password hashes never exposed in API responses
-- All auth responses sanitized (returns only id, name, email)
-- Strong password enforcement on both frontend and backend
+- All auth responses sanitized (returns only id, name, email, phone)
+- Strong password enforcement on both frontend and backend (requires special characters)
 - Secure session cookies (httpOnly, secure in production)
 - Row-level security via userId foreign key constraint
+- Current password required for any password change
 
 **Users Table:**
 - ID (UUID primary key)
 - Name, email (unique), passwordHash
+- Phone (optional text field)
 - Created timestamp
 
 ### External Dependencies
