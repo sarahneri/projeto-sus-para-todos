@@ -314,8 +314,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: user.id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
       });
     } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  const updateProfileSchema = z.object({
+    email: z.string().email("Email inválido").optional(),
+    phone: z.string().optional(),
+    currentPassword: z.string().optional(),
+    newPassword: z.string().optional(),
+    confirmPassword: z.string().optional(),
+  }).refine((data) => {
+    if (data.newPassword && !data.currentPassword) {
+      return false;
+    }
+    return true;
+  }, {
+    message: "Senha atual é necessária para alterar a senha",
+    path: ["currentPassword"],
+  }).refine((data) => {
+    if (data.newPassword && data.newPassword !== data.confirmPassword) {
+      return false;
+    }
+    return true;
+  }, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
+
+  app.put("/api/auth/profile", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { email, phone, currentPassword, newPassword, confirmPassword } = updateProfileSchema.parse(req.body);
+
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "Usuário não encontrado" });
+      }
+
+      if (newPassword) {
+        if (!currentPassword) {
+          return res.status(400).json({ error: "Senha atual é necessária para alterar a senha" });
+        }
+
+        const isValidPassword = await verifyPassword(currentPassword, user.passwordHash);
+        if (!isValidPassword) {
+          return res.status(400).json({ error: "Senha atual incorreta" });
+        }
+
+        const passwordValidation = validateStrongPassword(newPassword);
+        if (!passwordValidation.valid) {
+          return res.status(400).json({ error: passwordValidation.errors.join(", ") });
+        }
+
+        const passwordHash = await hashPassword(newPassword);
+        await storage.updateUserPassword(userId, passwordHash);
+      }
+
+      if (email && email !== user.email) {
+        const existingUser = await storage.getUserByEmail(email);
+        if (existingUser && existingUser.id !== userId) {
+          return res.status(400).json({ error: "Este email já está em uso" });
+        }
+      }
+
+      const updateData: { email?: string; phone?: string } = {};
+      if (email) updateData.email = email;
+      if (phone !== undefined) updateData.phone = phone;
+
+      let updatedUser = user;
+      if (Object.keys(updateData).length > 0) {
+        updatedUser = await storage.updateUserProfile(userId, updateData);
+      }
+
+      res.json({
+        message: "Perfil atualizado com sucesso",
+        user: {
+          id: updatedUser.id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+        }
+      });
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        return res.status(400).json({ error: error.errors[0].message });
+      }
       res.status(500).json({ error: error.message });
     }
   });
