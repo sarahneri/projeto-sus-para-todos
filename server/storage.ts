@@ -28,12 +28,12 @@ export interface IStorage {
   createSpecialty(specialty: InsertSpecialty): Promise<Specialty>;
   updateSpecialtyImage(id: string, imageUrl: string): Promise<void>;
 
-  getAppointments(): Promise<Appointment[]>;
-  getAppointment(id: string): Promise<Appointment | undefined>;
-  getAppointmentsByDate(date: Date): Promise<Appointment[]>;
-  createAppointment(appointment: InsertAppointment): Promise<Appointment>;
-  updateAppointment(id: string, appointment: Partial<InsertAppointment>): Promise<Appointment>;
-  deleteAppointment(id: string): Promise<void>;
+  getAppointments(userId: string): Promise<Appointment[]>;
+  getAppointment(id: string, userId: string): Promise<Appointment | undefined>;
+  getAppointmentsByDate(date: Date, userId: string): Promise<Appointment[]>;
+  createAppointment(appointment: InsertAppointment, userId: string): Promise<Appointment>;
+  updateAppointment(id: string, appointment: Partial<InsertAppointment>, userId: string): Promise<Appointment>;
+  deleteAppointment(id: string, userId: string): Promise<void>;
 
   getNews(): Promise<News[]>;
   getNewsItem(id: string): Promise<News | undefined>;
@@ -79,16 +79,18 @@ export class DatabaseStorage implements IStorage {
     await db.update(specialties).set({ imageUrl }).where(eq(specialties.id, id));
   }
 
-  async getAppointments(): Promise<Appointment[]> {
-    return await db.select().from(appointments);
+  async getAppointments(userId: string): Promise<Appointment[]> {
+    return await db.select().from(appointments).where(eq(appointments.userId, userId));
   }
 
-  async getAppointment(id: string): Promise<Appointment | undefined> {
-    const result = await db.select().from(appointments).where(eq(appointments.id, id));
+  async getAppointment(id: string, userId: string): Promise<Appointment | undefined> {
+    const result = await db.select().from(appointments).where(
+      and(eq(appointments.id, id), eq(appointments.userId, userId))
+    );
     return result[0];
   }
 
-  async getAppointmentsByDate(date: Date): Promise<Appointment[]> {
+  async getAppointmentsByDate(date: Date, userId: string): Promise<Appointment[]> {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(date);
@@ -98,22 +100,29 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(appointments)
       .where(
-        gte(appointments.appointmentDate, startOfDay)
+        and(
+          gte(appointments.appointmentDate, startOfDay),
+          eq(appointments.userId, userId)
+        )
       );
   }
 
-  async createAppointment(appointment: InsertAppointment): Promise<Appointment> {
-    const result = await db.insert(appointments).values(appointment).returning();
+  async createAppointment(appointment: InsertAppointment, userId: string): Promise<Appointment> {
+    const result = await db.insert(appointments).values({ ...appointment, userId }).returning();
     return result[0];
   }
 
-  async updateAppointment(id: string, appointment: Partial<InsertAppointment>): Promise<Appointment> {
-    const result = await db.update(appointments).set(appointment).where(eq(appointments.id, id)).returning();
+  async updateAppointment(id: string, appointment: Partial<InsertAppointment>, userId: string): Promise<Appointment> {
+    const result = await db.update(appointments).set(appointment).where(
+      and(eq(appointments.id, id), eq(appointments.userId, userId))
+    ).returning();
     return result[0];
   }
 
-  async deleteAppointment(id: string): Promise<void> {
-    await db.delete(appointments).where(eq(appointments.id, id));
+  async deleteAppointment(id: string, userId: string): Promise<void> {
+    await db.delete(appointments).where(
+      and(eq(appointments.id, id), eq(appointments.userId, userId))
+    );
   }
 
   async getNews(): Promise<News[]> {
