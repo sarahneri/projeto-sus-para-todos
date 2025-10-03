@@ -9,7 +9,7 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { path: "/", label: "Início", icon: Home },
+    { path: "/home", label: "Início", icon: Home },
     { path: "/agendar", label: "Agendar", icon: Calendar },
     { path: "/noticias", label: "Notícias", icon: Newspaper },
   ];
@@ -19,7 +19,7 @@ export function Header() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
           <Link 
-            href="/"
+            href="/home"
             className="flex items-center gap-3 hover-elevate active-elevate-2 rounded-lg px-3 py-2"
             data-testid="link-home"
           >
