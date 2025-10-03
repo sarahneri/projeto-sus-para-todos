@@ -9,7 +9,7 @@ import {
   insertUserSchema,
 } from "@shared/schema";
 import { generateSpecialtyIcon, generateNewsImage } from "./openai-service";
-import { hashPassword, verifyPassword, validateStrongPassword } from "./auth";
+import { hashPassword, verifyPassword, validateStrongPassword, requireAuth } from "./auth";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -75,18 +75,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/appointments", async (_req, res) => {
+  app.get("/api/appointments", requireAuth, async (req, res) => {
     try {
-      const appointments = await storage.getAppointments();
+      const userId = req.session.userId!;
+      const appointments = await storage.getAppointments(userId);
       res.json(appointments);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   });
 
-  app.get("/api/appointments/:id", async (req, res) => {
+  app.get("/api/appointments/:id", requireAuth, async (req, res) => {
     try {
-      const appointment = await storage.getAppointment(req.params.id);
+      const userId = req.session.userId!;
+      const appointment = await storage.getAppointment(req.params.id, userId);
       if (!appointment) {
         return res.status(404).json({ error: "Agendamento não encontrado" });
       }
@@ -96,10 +98,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/appointments", async (req, res) => {
+  app.post("/api/appointments", requireAuth, async (req, res) => {
     try {
+      const userId = req.session.userId!;
       const validated = insertAppointmentSchema.parse(req.body);
-      const appointment = await storage.createAppointment(validated);
+      const appointment = await storage.createAppointment(validated, userId);
       console.log("[POST /api/appointments] Appointment created successfully:", appointment.id);
       res.status(201).json(appointment);
     } catch (error: any) {
@@ -108,14 +111,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/appointments/:id", async (req, res) => {
+  app.put("/api/appointments/:id", requireAuth, async (req, res) => {
     try {
-      const appointment = await storage.getAppointment(req.params.id);
+      const userId = req.session.userId!;
+      const appointment = await storage.getAppointment(req.params.id, userId);
       if (!appointment) {
         return res.status(404).json({ error: "Agendamento não encontrado" });
       }
       const validated = insertAppointmentSchema.partial().parse(req.body);
-      const updated = await storage.updateAppointment(req.params.id, validated);
+      const updated = await storage.updateAppointment(req.params.id, validated, userId);
       console.log("[PUT /api/appointments] Appointment updated successfully:", updated.id);
       res.json(updated);
     } catch (error: any) {
@@ -124,13 +128,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/appointments/:id", async (req, res) => {
+  app.delete("/api/appointments/:id", requireAuth, async (req, res) => {
     try {
-      const appointment = await storage.getAppointment(req.params.id);
+      const userId = req.session.userId!;
+      const appointment = await storage.getAppointment(req.params.id, userId);
       if (!appointment) {
         return res.status(404).json({ error: "Agendamento não encontrado" });
       }
-      await storage.deleteAppointment(req.params.id);
+      await storage.deleteAppointment(req.params.id, userId);
       console.log("[DELETE /api/appointments] Appointment deleted successfully:", req.params.id);
       res.status(204).send();
     } catch (error: any) {
