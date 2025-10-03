@@ -6,8 +6,11 @@ import {
   insertSpecialtySchema,
   insertAppointmentSchema,
   insertNewsSchema,
+  insertUserSchema,
 } from "@shared/schema";
 import { generateSpecialtyIcon, generateNewsImage } from "./openai-service";
+import { hashPassword, verifyPassword, validateStrongPassword } from "./auth";
+import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/hospitals", async (_req, res) => {
@@ -194,6 +197,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateNewsImage(req.params.id, imageUrl);
 
       res.json({ imageUrl });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  const registerSchema = z.object({
+    name: z.string().min(1, "Nome é obrigatório"),
+    email: z.string().email("Email inválido"),
+    password: z.string(),
+    confirmPassword: z.string(),
+  }).refine(data => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
+
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const { name, email, password, confirmPassword } = registerSchema.parse(req.body);
+
+      const passwordValidation = validateStrongPassword(password);
+      if (!passwordValidation.valid) {
+        return res.status(400).json({ error: passwordValidation.errors.join(", ") });
+      }
+
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ error: "Email já cadastrado" });
+      }
+
+      const passwordHash = await hashPassword(password);
+      const user = await storage.createUser({
+        name,
+        email,
+        passwordHash,
+      });
+
+      req.session.userId = user.id;
+
+      res.status(201).json({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      });
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        return res.status(400).json({ error: error.errors[0].message });
+      }
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  const loginSchema = z.object({
+    email: z.string().email("Email inválido"),
+    password: z.string().min(1, "Senha é obrigatória"),
+  });
+
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = loginSchema.parse(req.body);
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ error: "Email ou senha incorretos" });
+      }
+
+      const isValid = await verifyPassword(password, user.passwordHash);
+      if (!isValid) {
+        return res.status(401).json({ error: "Email ou senha incorretos" });
+      }
+
+      req.session.userId = user.id;
+
+      res.json({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      });
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        return res.status(400).json({ error: error.errors[0].message });
+      }
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/auth/logout", async (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ error: "Erro ao fazer logout" });
+      }
+      res.json({ message: "Logout realizado com sucesso" });
+    });
+  });
+
+  app.get("/api/auth/me", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ error: "Não autenticado" });
+    }
+
+    try {
+      const user = await storage.getUserById(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ error: "Usuário não encontrado" });
+      }
+
+      res.json({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
