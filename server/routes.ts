@@ -95,12 +95,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/appointments", async (req, res) => {
     try {
-      console.log("[POST /api/appointments] Request body:", JSON.stringify(req.body, null, 2));
       const validated = insertAppointmentSchema.parse(req.body);
       const appointment = await storage.createAppointment(validated);
+      console.log("[POST /api/appointments] Appointment created successfully:", appointment.id);
       res.status(201).json(appointment);
     } catch (error: any) {
-      console.error("[POST /api/appointments] Validation error:", error);
+      console.error("[POST /api/appointments] Validation error:", error.message);
       res.status(400).json({ error: error.message });
     }
   });
