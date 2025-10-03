@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { Request, Response, NextFunction } from "express";
 
 export const passwordSchema = z
   .string()
@@ -28,4 +29,11 @@ export function validateStrongPassword(password: string): { valid: boolean; erro
     valid: false,
     errors: result.error.errors.map(e => e.message)
   };
+}
+
+export function requireAuth(req: Request, res: Response, next: NextFunction) {
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "Não autenticado. Faça login para continuar." });
+  }
+  next();
 }
