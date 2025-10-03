@@ -33,17 +33,21 @@ export function Footer() {
             <h3 className="text-xl font-semibold mb-6">Links Rápidos</h3>
             <ul className="space-y-3">
               <li>
-                <Link href="/agendar">
-                  <a className="text-lg text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-agendar">
-                    Agendar Consulta
-                  </a>
+                <Link 
+                  href="/agendar"
+                  className="text-lg text-muted-foreground hover:text-foreground transition-colors" 
+                  data-testid="link-footer-agendar"
+                >
+                  Agendar Consulta
                 </Link>
               </li>
               <li>
-                <Link href="/noticias">
-                  <a className="text-lg text-muted-foreground hover:text-foreground transition-colors" data-testid="link-footer-noticias">
-                    Notícias
-                  </a>
+                <Link 
+                  href="/noticias"
+                  className="text-lg text-muted-foreground hover:text-foreground transition-colors" 
+                  data-testid="link-footer-noticias"
+                >
+                  Notícias
                 </Link>
               </li>
               <li>

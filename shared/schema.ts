@@ -42,7 +42,9 @@ export const news = pgTable("news", {
 
 export const insertHospitalSchema = createInsertSchema(hospitals).omit({ id: true });
 export const insertSpecialtySchema = createInsertSchema(specialties).omit({ id: true });
-export const insertAppointmentSchema = createInsertSchema(appointments).omit({ id: true, createdAt: true });
+export const insertAppointmentSchema = createInsertSchema(appointments).omit({ id: true, createdAt: true }).extend({
+  appointmentDate: z.coerce.date(),
+});
 export const insertNewsSchema = createInsertSchema(news).omit({ id: true, publishedAt: true });
 
 export type Hospital = typeof hospitals.$inferSelect;

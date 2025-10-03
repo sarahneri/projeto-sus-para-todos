@@ -95,7 +95,7 @@ export function BookingForm() {
       patientCPF,
       patientBirth,
       patientPhone,
-      appointmentDate: selectedDate.toISOString(),
+      appointmentDate: selectedDate,
       appointmentTime: selectedTime,
     });
   };
