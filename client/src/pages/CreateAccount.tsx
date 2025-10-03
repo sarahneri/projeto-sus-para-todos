@@ -58,10 +58,7 @@ export default function CreateAccount() {
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterFormData) => {
-      return await apiRequest("/api/auth/register", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return await apiRequest("POST", "/api/auth/register", data);
     },
     onSuccess: () => {
       toast({

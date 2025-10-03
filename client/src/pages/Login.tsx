@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,23 +21,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, "O e-mail é obrigatório")
-    .email("E-mail inválido"),
-  password: z
-    .string()
-    .min(8, "A senha deve ter pelo menos 8 caracteres")
-    .regex(/[a-zA-Z]/, "A senha deve conter letras")
-    .regex(/[0-9]/, "A senha deve conter números"),
+  email: z.string().email("E-mail inválido"),
+  password: z.string().min(1, "Senha é obrigatória"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function Login() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -47,20 +43,28 @@ export default function Login() {
     },
   });
 
-  const onSubmit = async (data: LoginFormData) => {
-    try {
-      console.log("Login data:", data);
+  const loginMutation = useMutation({
+    mutationFn: async (data: LoginFormData) => {
+      return await apiRequest("POST", "/api/auth/login", data);
+    },
+    onSuccess: () => {
       toast({
         title: "Login realizado!",
-        description: "Você foi autenticado com sucesso.",
+        description: "Bem-vindo de volta ao SUS Para Todos.",
       });
-    } catch (error) {
+      setLocation("/home");
+    },
+    onError: (error: any) => {
       toast({
-        title: "Erro no login",
-        description: "Não foi possível realizar o login. Tente novamente.",
         variant: "destructive",
+        title: "Erro no login",
+        description: error.message || "Email ou senha incorretos.",
       });
-    }
+    },
+  });
+
+  const onSubmit = (data: LoginFormData) => {
+    loginMutation.mutate(data);
   };
 
   return (
@@ -128,10 +132,10 @@ export default function Login() {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={form.formState.isSubmitting}
+                disabled={loginMutation.isPending}
                 data-testid="button-submit"
               >
-                {form.formState.isSubmitting ? "Entrando..." : "Entrar"}
+                {loginMutation.isPending ? "Entrando..." : "Entrar"}
               </Button>
             </form>
           </Form>
