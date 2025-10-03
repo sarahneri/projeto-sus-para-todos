@@ -18,29 +18,31 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b bg-card">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
-          <Link href="/">
-            <button className="flex items-center gap-3 hover-elevate active-elevate-2 rounded-lg px-3 py-2" data-testid="link-home">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                <span className="text-xl font-bold text-primary-foreground">SUS</span>
-              </div>
-              <span className="hidden text-xl font-bold sm:inline">SUS Para Todos</span>
-            </button>
+          <Link 
+            href="/"
+            className="flex items-center gap-3 hover-elevate active-elevate-2 rounded-lg px-3 py-2"
+            data-testid="link-home"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+              <span className="text-xl font-bold text-primary-foreground">SUS</span>
+            </div>
+            <span className="hidden text-xl font-bold sm:inline">SUS Para Todos</span>
           </Link>
 
           <nav className="hidden items-center gap-2 md:flex">
             {navItems.map((item) => (
-              <Link key={item.path} href={item.path}>
-                <a
-                  className={`flex items-center gap-2 rounded-lg px-4 py-2 text-lg font-medium transition-colors hover-elevate active-elevate-2 ${
-                    location === item.path
-                      ? "bg-primary text-primary-foreground"
-                      : "text-foreground"
-                  }`}
-                  data-testid={`link-nav-${item.label.toLowerCase()}`}
-                >
-                  <item.icon className="h-5 w-5" />
-                  {item.label}
-                </a>
+              <Link 
+                key={item.path} 
+                href={item.path}
+                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-lg font-medium transition-colors hover-elevate active-elevate-2 ${
+                  location === item.path
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground"
+                }`}
+                data-testid={`link-nav-${item.label.toLowerCase()}`}
+              >
+                <item.icon className="h-5 w-5" />
+                {item.label}
               </Link>
             ))}
           </nav>
@@ -64,19 +66,19 @@ export function Header() {
         <div className="border-t bg-card md:hidden">
           <nav className="mx-auto max-w-7xl space-y-1 px-4 py-4">
             {navItems.map((item) => (
-              <Link key={item.path} href={item.path}>
-                <a
-                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-lg font-medium hover-elevate active-elevate-2 ${
-                    location === item.path
-                      ? "bg-primary text-primary-foreground"
-                      : "text-foreground"
-                  }`}
-                  onClick={() => setMobileMenuOpen(false)}
-                  data-testid={`link-mobile-${item.label.toLowerCase()}`}
-                >
-                  <item.icon className="h-5 w-5" />
-                  {item.label}
-                </a>
+              <Link 
+                key={item.path} 
+                href={item.path}
+                className={`flex items-center gap-3 rounded-lg px-4 py-3 text-lg font-medium hover-elevate active-elevate-2 ${
+                  location === item.path
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground"
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+                data-testid={`link-mobile-${item.label.toLowerCase()}`}
+              >
+                <item.icon className="h-5 w-5" />
+                {item.label}
               </Link>
             ))}
           </nav>
