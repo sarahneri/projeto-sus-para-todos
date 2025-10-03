@@ -105,6 +105,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/appointments/:id", async (req, res) => {
+    try {
+      const appointment = await storage.getAppointment(req.params.id);
+      if (!appointment) {
+        return res.status(404).json({ error: "Agendamento não encontrado" });
+      }
+      const validated = insertAppointmentSchema.partial().parse(req.body);
+      const updated = await storage.updateAppointment(req.params.id, validated);
+      console.log("[PUT /api/appointments] Appointment updated successfully:", updated.id);
+      res.json(updated);
+    } catch (error: any) {
+      console.error("[PUT /api/appointments] Error:", error.message);
+      res.status(400).json({ error: error.message });
+    }
+  });
+
+  app.delete("/api/appointments/:id", async (req, res) => {
+    try {
+      const appointment = await storage.getAppointment(req.params.id);
+      if (!appointment) {
+        return res.status(404).json({ error: "Agendamento não encontrado" });
+      }
+      await storage.deleteAppointment(req.params.id);
+      console.log("[DELETE /api/appointments] Appointment deleted successfully:", req.params.id);
+      res.status(204).send();
+    } catch (error: any) {
+      console.error("[DELETE /api/appointments] Error:", error.message);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/news", async (_req, res) => {
     try {
       const newsItems = await storage.getNews();
