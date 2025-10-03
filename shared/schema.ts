@@ -40,12 +40,21 @@ export const news = pgTable("news", {
   publishedAt: timestamp("published_at").defaultNow().notNull(),
 });
 
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertHospitalSchema = createInsertSchema(hospitals).omit({ id: true });
 export const insertSpecialtySchema = createInsertSchema(specialties).omit({ id: true });
 export const insertAppointmentSchema = createInsertSchema(appointments).omit({ id: true, createdAt: true }).extend({
   appointmentDate: z.coerce.date(),
 });
 export const insertNewsSchema = createInsertSchema(news).omit({ id: true, publishedAt: true });
+export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 
 export type Hospital = typeof hospitals.$inferSelect;
 export type InsertHospital = z.infer<typeof insertHospitalSchema>;
@@ -55,3 +64,5 @@ export type Appointment = typeof appointments.$inferSelect;
 export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 export type News = typeof news.$inferSelect;
 export type InsertNews = z.infer<typeof insertNewsSchema>;
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
