@@ -9,6 +9,9 @@ import { Footer } from "@/components/Footer";
 import Home from "@/pages/Home";
 import Booking from "@/pages/Booking";
 import News from "@/pages/News";
+import Login from "@/pages/Login";
+import CreateAccount from "@/pages/CreateAccount";
+import ForgotPassword from "@/pages/ForgotPassword";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -17,6 +20,9 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/agendar" component={Booking} />
       <Route path="/noticias" component={News} />
+      <Route path="/login" component={Login} />
+      <Route path="/criar-conta" component={CreateAccount} />
+      <Route path="/esqueci-senha" component={ForgotPassword} />
       <Route component={NotFound} />
     </Switch>
   );
