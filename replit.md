@@ -39,9 +39,13 @@ Preferred communication style: Simple, everyday language.
 - Responsive design with mobile-first breakpoints
 
 **Key Pages:**
-- Home: Hero section with feature highlights and call-to-action
+- Login: Landing page with authentication (email/password validation)
+- Home: Hero section with feature highlights and call-to-action buttons
 - Booking: Multi-step form for appointment scheduling
+- My Appointments: View, edit, and cancel scheduled appointments
 - News: Health news and information articles
+- Create Account: User registration page
+- Forgot Password: Password recovery page
 - 404: Not found page
 
 ### Backend Architecture
@@ -58,10 +62,15 @@ Preferred communication style: Simple, everyday language.
 - Error handling middleware
 
 **API Endpoints:**
-- `/api/hospitals` - Hospital CRUD operations
-- `/api/specialties` - Medical specialty management
-- `/api/appointments` - Appointment booking and retrieval
-- `/api/news` - Health news articles
+- `/api/hospitals` - Hospital CRUD operations (GET, POST)
+- `/api/specialties` - Medical specialty management (GET, POST)
+- `/api/appointments` - Appointment management (GET, POST, PUT, DELETE)
+  - GET /api/appointments - List all appointments
+  - GET /api/appointments/:id - Get single appointment
+  - POST /api/appointments - Create new appointment
+  - PUT /api/appointments/:id - Update appointment (date/time)
+  - DELETE /api/appointments/:id - Cancel appointment
+- `/api/news` - Health news articles (GET, POST)
 
 **Development Server:** Vite integration in development mode with HMR (Hot Module Replacement) support
 
