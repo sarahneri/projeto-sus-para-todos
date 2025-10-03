@@ -315,6 +315,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  const verifyEmailSchema = z.object({
+    email: z.string().email("Email inválido"),
+  });
+
+  app.post("/api/auth/verify-email", async (req, res) => {
+    try {
+      const { email } = verifyEmailSchema.parse(req.body);
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ error: "Email não encontrado" });
+      }
+
+      res.json({ 
+        message: "Email verificado com sucesso",
+        userId: user.id 
+      });
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        return res.status(400).json({ error: error.errors[0].message });
+      }
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  const resetPasswordSchema = z.object({
+    userId: z.string(),
+    newPassword: z.string().min(1, "Nova senha é obrigatória"),
+    confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
+  }).refine((data) => data.newPassword === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
+
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { userId, newPassword, confirmPassword } = resetPasswordSchema.parse(req.body);
+
+      const passwordValidation = validateStrongPassword(newPassword);
+      if (!passwordValidation.valid) {
+        return res.status(400).json({ error: passwordValidation.errors.join(", ") });
+      }
+
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "Usuário não encontrado" });
+      }
+
+      const passwordHash = await hashPassword(newPassword);
+      await storage.updateUserPassword(userId, passwordHash);
+
+      res.json({ message: "Senha redefinida com sucesso" });
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        return res.status(400).json({ error: error.errors[0].message });
+      }
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

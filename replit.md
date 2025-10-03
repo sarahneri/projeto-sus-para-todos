@@ -71,6 +71,13 @@ Preferred communication style: Simple, everyday language.
   - PUT /api/appointments/:id - Update appointment (date/time)
   - DELETE /api/appointments/:id - Cancel appointment
 - `/api/news` - Health news articles (GET, POST)
+- `/api/auth` - Authentication and password recovery
+  - POST /api/auth/register - Create new user account
+  - POST /api/auth/login - Authenticate user
+  - POST /api/auth/logout - End user session
+  - GET /api/auth/me - Get current user info
+  - POST /api/auth/verify-email - Verify email exists for password recovery
+  - POST /api/auth/reset-password - Reset user password (simplified flow)
 
 **Development Server:** Vite integration in development mode with HMR (Hot Module Replacement) support
 
@@ -117,9 +124,36 @@ Preferred communication style: Simple, everyday language.
 
 ### Authentication and Authorization
 
-**Current Implementation:** No authentication system implemented. The application currently operates as an open-access booking system.
+**Authentication System:** Fully implemented user authentication with secure session management.
 
-**Future Consideration:** Session-based authentication infrastructure is partially configured (connect-pg-simple for session storage) but not actively used.
+**User Registration:**
+- Strong password validation (8+ characters, uppercase, lowercase, numbers)
+- Visual password strength indicators in real-time
+- Email uniqueness enforcement
+- bcryptjs password hashing with salt rounds of 10
+
+**Login/Logout:**
+- Session-based authentication using express-session
+- Secure session storage in PostgreSQL via connect-pg-simple
+- httpOnly cookies with 30-day duration
+- Automatic session creation on login/registration
+
+**Password Recovery:**
+- Simplified two-step recovery flow (as per user requirements)
+- Step 1: Email verification to confirm account exists
+- Step 2: Set new password with strong password validation
+- **Note:** This is a simplified implementation without email tokens/links, designed for ease of use. For production, consider implementing token-based recovery with email verification for enhanced security.
+
+**Security Features:**
+- Password hashes never exposed in API responses
+- All auth responses sanitized (returns only id, name, email)
+- Strong password enforcement on both frontend and backend
+- Secure session cookies (httpOnly, secure in production)
+
+**Users Table:**
+- ID (UUID primary key)
+- Name, email (unique), passwordHash
+- Created timestamp
 
 ### External Dependencies
 
