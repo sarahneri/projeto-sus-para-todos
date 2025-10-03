@@ -30,16 +30,12 @@ export default function CreateAccount() {
           <p className="text-sm text-muted-foreground text-center">
             Esta funcionalidade estará disponível em breve. Por enquanto, você pode agendar consultas sem criar uma conta.
           </p>
-          <Link href="/login">
-            <Button className="w-full" data-testid="button-back-to-login">
-              Voltar para Login
-            </Button>
-          </Link>
-          <Link href="/agendar">
-            <Button variant="outline" className="w-full" data-testid="button-book-appointment">
-              Agendar Consulta
-            </Button>
-          </Link>
+          <Button className="w-full" data-testid="button-back-to-login" asChild>
+            <Link href="/login">Voltar para Login</Link>
+          </Button>
+          <Button variant="outline" className="w-full" data-testid="button-book-appointment" asChild>
+            <Link href="/agendar">Agendar Consulta</Link>
+          </Button>
         </CardContent>
       </Card>
     </div>

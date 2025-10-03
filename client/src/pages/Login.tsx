@@ -116,13 +116,12 @@ export default function Login() {
               />
 
               <div className="flex justify-end">
-                <Link href="/esqueci-senha">
-                  <a
-                    className="text-sm text-primary hover:underline"
-                    data-testid="link-forgot-password"
-                  >
-                    Esqueci minha senha
-                  </a>
+                <Link 
+                  href="/esqueci-senha"
+                  className="text-sm text-primary hover:underline"
+                  data-testid="link-forgot-password"
+                >
+                  Esqueci minha senha
                 </Link>
               </div>
 
@@ -140,13 +139,12 @@ export default function Login() {
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
             Ainda não tem uma conta?{" "}
-            <Link href="/criar-conta">
-              <a
-                className="text-primary font-medium hover:underline"
-                data-testid="link-create-account"
-              >
-                Crie uma agora
-              </a>
+            <Link 
+              href="/criar-conta"
+              className="text-primary font-medium hover:underline"
+              data-testid="link-create-account"
+            >
+              Crie uma agora
             </Link>
           </p>
         </CardFooter>
