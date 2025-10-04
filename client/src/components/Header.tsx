@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { ThemeToggle } from "./ThemeToggle";
-import { Menu, X, Calendar, Newspaper, Home } from "lucide-react";
+import { Menu, X, Calendar, Newspaper, Home, CalendarCheck2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -11,6 +11,7 @@ export function Header() {
   const navItems = [
     { path: "/home", label: "Início", icon: Home },
     { path: "/agendar", label: "Agendar", icon: Calendar },
+    { path: "/meus-agendamentos", label: "Agendamentos", icon: CalendarCheck2 },
     { path: "/noticias", label: "Notícias", icon: Newspaper },
   ];
 

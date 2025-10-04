@@ -1,6 +1,42 @@
-node_modules
-dist
-.DS_Store
-server/public
-vite.config.ts.*
+# Dependências
+node_modules/
+
+# Builds / bundles
+dist/
+client/dist/
+server/public/
+
+# Env / segredos
+.env
+.env.*
+!.env.example
+
+# Arquivos temporários / cache
 *.tar.gz
+*.log
+*.tsbuildinfo
+.cache/
+temp/
+tmp/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Ferramentas de deploy
+.vercel/
+.netlify/
+.railway/
+.fly/
+.koyeb/
+docker-data/
+
+# Testes
+coverage/
+
+# IDE/Editor
+.vscode/
+.idea/
+
+# Configs gerados do Vite
+vite.config.ts.*
